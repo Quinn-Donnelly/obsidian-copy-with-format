@@ -16,14 +16,15 @@ export default class MyPlugin extends Plugin {
     async onload() {
         await this.loadSettings();
 
-       // This adds an editor command that can perform some operation on the current editor instance
+        // This adds an editor command that can perform some operation on the current editor instance
         this.addCommand({
             id: 'copy-with-format',
             name: 'Copy With Format',
             editorCallback: (editor: Editor, view: MarkdownView) => {
                 const selectedText = editor.getSelection();
+                const filteredText = removeObsidianLinks(selectedText);
                 // will call to process the text here
-                navigator.clipboard.writeText(selectedText);
+                navigator.clipboard.writeText(filteredText);
             }
         });
         // This adds a complex command that can check whether the current state of the app allows execution of the command
@@ -70,6 +71,13 @@ export default class MyPlugin extends Plugin {
     async saveSettings() {
         await this.saveData(this.settings);
     }
+}
+
+function removeObsidianLinks(text: string): string {
+    // finds all occurrences of either [[ or ]]
+    const expression = "(?:\\[\\[)|(?:\\]\\])";
+    const mode = "g";
+    return text.replace(new RegExp(expression, mode), "").replace(new RegExp(expression, mode), "");
 }
 
 class SampleModal extends Modal {
